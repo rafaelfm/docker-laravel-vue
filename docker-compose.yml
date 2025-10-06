@@ -28,13 +28,19 @@ services:
     image: image-mysql
     container_name: mysql
     restart: always
-    healthcheck:
-      test: ps cax | grep mysql > /dev/null
-      interval: 3s
-      timeout: 20s
-      retries: 10
     environment:
-      - MYSQL_ROOT_PASSWORD=root
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-sib}
+      MYSQL_USER: ${MYSQL_USER:-sib}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-sib}
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p$${MYSQL_ROOT_PASSWORD:-} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - "/var/lib/mysql:/var/lib/mysql"
     networks:

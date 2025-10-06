@@ -16,10 +16,7 @@ RUN apt-get update && apt-get install -y \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Define o diretório de trabalho
-WORKDIR /var/www
-
-# Instala as dependências do Composer
-#RUN composer install
+WORKDIR /var/www/html
 
 # Expondo a porta 9000
 EXPOSE 9000
