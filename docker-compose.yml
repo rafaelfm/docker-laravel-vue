@@ -1,0 +1,55 @@
+version: '3.7'
+services: 
+  vue-frontend:
+    build:
+      context: image-front
+    container_name: vue-frontend
+    ports:
+      - "8080:5173"
+    volumes:
+      - ../front:/app
+    networks:
+      - network-laravel-vue
+    command: ['yarn', 'dev']
+  laravel-backend:
+    build:
+      context: image-back
+    container_name: laravel-backend
+    ports:
+      - "8000:9000"
+    volumes:
+      - ../back:/var/www/html
+    networks:
+      - network-laravel-vue
+    depends_on:
+      - mysql
+  mysql:
+    build: image-mysql
+    image: image-mysql
+    container_name: mysql
+    restart: always
+    healthcheck:
+      test: ps cax | grep mysql > /dev/null
+      interval: 3s
+      timeout: 20s
+      retries: 10
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - "/var/lib/mysql:/var/lib/mysql"
+    networks:
+      - network-laravel-vue
+
+  nginx:
+      image: nginx:alpine
+      container_name: nginx
+      restart: always
+      ports:
+        - "91:80"  # Porta 90 do host mapeia para porta 80 do container
+      volumes:
+        - ./image-nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      networks:
+        - network-laravel-vue
+networks:
+  network-laravel-vue:
+    driver: bridge
