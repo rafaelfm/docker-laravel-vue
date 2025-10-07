@@ -4,23 +4,27 @@ services:
     build:
       context: image-front
     container_name: vue-frontend
-    ports:
-      - "8080:5173"
     volumes:
       - ../front:/app
     networks:
       - network-laravel-vue
+    expose:
+      - "5173"
     command: ['yarn', 'dev']
+    depends_on:
+      - laravel-backend
   laravel-backend:
     build:
-      context: image-back
+      # para conseguir ver o pasta do back, dado que ele usa o context
+      context: ..
+      dockerfile: docker-laravel-vue/image-back/Dockerfile
     container_name: laravel-backend
-    ports:
-      - "8000:9000"
     volumes:
       - ../back:/var/www/html
     networks:
       - network-laravel-vue
+    expose:
+      - "9000"
     depends_on:
       - mysql
   mysql:
@@ -51,11 +55,20 @@ services:
       container_name: nginx
       restart: always
       ports:
-        - "91:80"  # Porta 90 do host mapeia para porta 80 do container
+        - "91:80"
       volumes:
         - ./image-nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+        - ../back:/var/www/html
       networks:
         - network-laravel-vue
+      depends_on:
+        - vue-frontend
+        - laravel-backend
 networks:
   network-laravel-vue:
     driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.27.0.0/16
+          gateway: 172.27.0.1
