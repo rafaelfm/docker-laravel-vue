@@ -4,6 +4,7 @@ services:
     build:
       context: image-front
     container_name: vue-frontend
+    restart: always
     volumes:
       - ../front:/app
     networks:
@@ -19,6 +20,7 @@ services:
       context: ..
       dockerfile: docker-laravel-vue/image-back/Dockerfile
     container_name: laravel-backend
+    restart: always
     volumes:
       - ../back:/var/www/html
     networks:
